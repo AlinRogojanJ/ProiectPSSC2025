@@ -28,9 +28,6 @@ appsettings.json
 appsettings.*.json
 secret.json
 
-# Entity Framework Migrations
-Migrations/
-
 # Database files
 *.mdf
 *.ldf
