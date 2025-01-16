@@ -11,8 +11,8 @@ using ProiectPSSC2025.Models.Contexts;
 
 namespace ProiectPSSC2025.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(ReservationContext))]
+    partial class ReservationContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

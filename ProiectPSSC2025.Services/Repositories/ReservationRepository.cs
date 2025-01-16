@@ -5,26 +5,26 @@ using ProiectPSSC2025.Models.Contexts;
 
 public class ReservationRepository : IReservationRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ReservationContext _reservationContext;
 
-    public ReservationRepository(AppDbContext context)
+    public ReservationRepository(ReservationContext reservationContext)
     {
-        _context = context;
+        _reservationContext = reservationContext;
     }
 
     public async Task<IEnumerable<Reservation>> GetAllAsync()
     {
-        return await _context.Set<Reservation>().ToListAsync();
+        return await _reservationContext.Set<Reservation>().ToListAsync();
     }
 
     public async Task<Reservation> GetByIdAsync(string id)
     {
-        return await _context.Set<Reservation>().FindAsync(id);
+        return await _reservationContext.Reservations.FirstOrDefaultAsync(r => r.Id == id);
     }
 
     public async Task AddAsync(Reservation reservation)
     {
-        await _context.Set<Reservation>().AddAsync(reservation);
-        await _context.SaveChangesAsync();
+        await _reservationContext.Reservations.AddAsync(reservation);
+        await _reservationContext.SaveChangesAsync();
     }
 }
