@@ -6,10 +6,9 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProiectPSSC2025.Models.Contexts;
 
-
 #nullable disable
 
-namespace ProiectPSSC2025.Migrations
+namespace ProiectPSSC2025.Models.Migrations
 {
     [DbContext(typeof(ReservationContext))]
     partial class ReservationContextModelSnapshot : ModelSnapshot

@@ -12,27 +12,27 @@ namespace ProiectPSSC2025.Services.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly AppDbContext _context;
+        private readonly ReservationContext _reservationContext;
 
-        public UserRepository(AppDbContext context)
+        public UserRepository(ReservationContext reservationContext)
         {
-            _context = context;
+            _reservationContext = reservationContext;
         }
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            return await _context.Users.ToListAsync();
+            return await _reservationContext.Users.ToListAsync();
         }
 
         public async Task<User?> GetUserByIdAsync(string id)
         {
-            return await _context.Users.FindAsync(id);
+            return await _reservationContext.Users.FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task AddUserAsync(User user)
         {
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
+            await _reservationContext.Users.AddAsync(user);
+            await _reservationContext.SaveChangesAsync();
         }
     }
 }

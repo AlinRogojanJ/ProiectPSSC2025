@@ -1,3 +1,4 @@
+using Azure.Messaging.ServiceBus;
 using Microsoft.EntityFrameworkCore;
 using ProiectPSSC2025.Interfaces;
 using ProiectPSSC2025.Models.Contexts;
@@ -13,19 +14,38 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Configure EF Core
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ReservationContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlServerOptions => sqlServerOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,           
+            maxRetryDelay: TimeSpan.FromSeconds(10), 
+            errorNumbersToAdd: null))   
+);
 
+
+// AutoMapper registration
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-
-
 
 // Register Interfaces and Implementations
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
+
+// Configure Azure Service Bus
+string serviceBusConnectionString = builder.Configuration["ServiceBus:ConnectionString"];
+if (!string.IsNullOrWhiteSpace(serviceBusConnectionString))
+{
+    builder.Services.AddSingleton<ServiceBusClient>(serviceProvider =>
+    {
+        return new ServiceBusClient(serviceBusConnectionString);
+    });
+}
+else
+{
+    throw new InvalidOperationException("ServiceBus connection string is not configured. Please check your configuration.");
+}
 
 var app = builder.Build();
 
