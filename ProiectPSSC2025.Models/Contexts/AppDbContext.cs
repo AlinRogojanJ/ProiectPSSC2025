@@ -1,7 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ProiectPSSC2025.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace ProiectPSSC2025.Data
+namespace ProiectPSSC2025.Models.Contexts
 {
     public class AppDbContext : DbContext
     {

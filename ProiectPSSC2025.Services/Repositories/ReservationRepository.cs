@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProiectPSSC2025.Interfaces;
 using ProiectPSSC2025.Models;
-using ProiectPSSC2025.Data;
+using ProiectPSSC2025.Models.Contexts;
 
 public class ReservationRepository : IReservationRepository
 {

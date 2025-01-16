@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ProiectPSSC2025.DTOs;
-using ProiectPSSC2025.Interfaces;
 using ProiectPSSC2025.Models;
+using ProiectPSSC2025.Models.DTOs;
+using ProiectPSSC2025.Services.Interfaces;
 
 namespace ProiectPSSC2025.Controllers
 {

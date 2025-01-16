@@ -1,9 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ProiectPSSC2025.Data;
-using ProiectPSSC2025.Interfaces;
+﻿using ProiectPSSC2025.Models.Contexts;
 using ProiectPSSC2025.Models;
+using ProiectPSSC2025.Services.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
-namespace ProiectPSSC2025.Repository
+namespace ProiectPSSC2025.Services.Repositories
 {
     public class UserRepository : IUserRepository
     {
