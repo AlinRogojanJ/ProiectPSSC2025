@@ -15,7 +15,14 @@ builder.Services.AddSwaggerGen();
 
 // Configure EF Core
 builder.Services.AddDbContext<ReservationContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlServerOptions => sqlServerOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,           
+            maxRetryDelay: TimeSpan.FromSeconds(10), 
+            errorNumbersToAdd: null))   
+);
+
 
 // AutoMapper registration
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
