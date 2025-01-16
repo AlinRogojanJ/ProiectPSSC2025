@@ -3,7 +3,7 @@ using ProiectPSSC2025.Data;
 using ProiectPSSC2025.Interfaces;
 using ProiectPSSC2025.Models;
 
-namespace ProiectPSSC2025.Repositories
+namespace ProiectPSSC2025.Repository
 {
     public class UserRepository : IUserRepository
     {
