@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ProiectPSSC2025.Interfaces;
 using ProiectPSSC2025.Models.Contexts;
 using ProiectPSSC2025.Services;
 using ProiectPSSC2025.Services.Interfaces;
@@ -15,9 +16,16 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
+
+
 // Register Interfaces and Implementations
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+builder.Services.AddScoped<IReservationService, ReservationService>();
 
 var app = builder.Build();
 
