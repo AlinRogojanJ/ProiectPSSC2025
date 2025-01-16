@@ -26,8 +26,8 @@ namespace ProiectPSSC2025.Services
         {
             _userRepository = userRepository;
             _mapper = mapper;
-            _serviceBusClient = serviceBusClient;          // Assign the injected service bus client
-            _configuration = configuration;                // Assign the injected configuration
+            _serviceBusClient = serviceBusClient;          
+            _configuration = configuration;                
         }
 
         public async Task<IEnumerable<UserDTO>> GetAllUsersAsync()

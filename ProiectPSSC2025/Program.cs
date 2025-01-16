@@ -32,6 +32,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
+builder.Services.AddScoped<IBillingService, BillingService>();
 
 // Configure Azure Service Bus
 string serviceBusConnectionString = builder.Configuration["ServiceBus:ConnectionString"];
