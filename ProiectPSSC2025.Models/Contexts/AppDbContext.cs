@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace ProiectPSSC2025.Models.Contexts
 {
-    public class AppDbContext : DbContext
+    public class ReservationContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+        public ReservationContext(DbContextOptions<ReservationContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
         public DbSet<Room> Rooms { get; set; }

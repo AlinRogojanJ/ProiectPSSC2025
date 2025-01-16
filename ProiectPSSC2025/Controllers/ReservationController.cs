@@ -19,6 +19,8 @@ namespace ProiectPSSC2025.Controllers
             public async Task<IActionResult> GetAll()
             {
                 var reservations = await _reservationService.GetAllReservationsAsync();
+                if (reservations == null)
+                    return NotFound();
                 return Ok(reservations);
             }
 
@@ -38,7 +40,7 @@ namespace ProiectPSSC2025.Controllers
                     return BadRequest(ModelState);
 
                 await _reservationService.CreateReservationAsync(reservationDto);
-                return CreatedAtAction(nameof(GetById), new { id = reservationDto.Id }, reservationDto);
+                return Created("Reservation created", reservationDto);
             }
         }
 }

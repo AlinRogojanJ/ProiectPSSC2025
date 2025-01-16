@@ -12,7 +12,7 @@ using ProiectPSSC2025.Models.Contexts;
 
 namespace ProiectPSSC2025.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(ReservationContext))]
     [Migration("20250105111940_AddValidation")]
     partial class AddValidation
     {
