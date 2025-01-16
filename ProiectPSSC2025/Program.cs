@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using ProiectPSSC2025.Data;
-using ProiectPSSC2025.Interfaces;
-using ProiectPSSC2025.Repositories;
+using ProiectPSSC2025.Models.Contexts;
 using ProiectPSSC2025.Services;
+using ProiectPSSC2025.Services.Interfaces;
+using ProiectPSSC2025.Services.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
