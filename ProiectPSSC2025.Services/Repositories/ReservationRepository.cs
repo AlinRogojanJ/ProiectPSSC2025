@@ -30,19 +30,19 @@ public class ReservationRepository : IReservationRepository
 
     public async Task RemoveAsync(string id)
     {
-        var reservationToBeDeleted = await _context.Set<Reservation>().FindAsync(id);
+        var reservationToBeDeleted = await _reservationContext.Reservations.FindAsync(id);
 
         if (reservationToBeDeleted != null)
         {
-            _context.Set<Reservation>().Remove(reservationToBeDeleted);
+            _reservationContext.Reservations.Remove(reservationToBeDeleted);
         }
 
-        await _context.SaveChangesAsync();
+        await _reservationContext.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(Reservation reservation)
     {
-        var dbReservation = await _context.Set<Reservation>().FirstOrDefaultAsync(r => r.Id == reservation.Id);
+        var dbReservation = await _reservationContext.Reservations.FirstOrDefaultAsync(r => r.Id == reservation.Id);
 
         if (dbReservation != null)
         {
@@ -54,12 +54,9 @@ public class ReservationRepository : IReservationRepository
             dbReservation.Status = reservation.Status;
             dbReservation.RoomId = reservation.RoomId;
             dbReservation.UserId = reservation.UserId;
-
-            // Explicitly mark the entity as modified
-            _context.Entry(dbReservation).State = EntityState.Modified;
         }
 
-        await _context.SaveChangesAsync();
+        await _reservationContext.SaveChangesAsync();
     }
 
 }
