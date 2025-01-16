@@ -7,5 +7,7 @@ namespace ProiectPSSC2025.Interfaces
         Task<IEnumerable<ReservationDTO>> GetAllReservationsAsync();
         Task<ReservationDTO> GetReservationByIdAsync(string id);
         Task CreateReservationAsync(ReservationDTO reservationDto);
+        Task RemoveReservationAsync(string id);
+        Task UpdateReservationAsync(ReservationDTO reservationDto);
     }
 }

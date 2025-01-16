@@ -31,4 +31,33 @@ public class ReservationService : IReservationService
         var reservation = _mapper.Map<Reservation>(reservationDto);
         await _repository.AddAsync(reservation);
     }
+
+    public async Task RemoveReservationAsync(string id)
+    {
+        await _repository.RemoveAsync(id);
+    }
+
+    public async Task UpdateReservationAsync(ReservationDTO reservationDto)
+    {
+        try
+        {
+            var newReservation = new Reservation() 
+            { 
+                UpdatedDate = DateTime.Now,
+                StartDate = reservationDto.StartDate,
+                EndDate = reservationDto.EndDate,
+                RoomId = reservationDto.RoomId,
+                Id = reservationDto.Id,
+                UserId = reservationDto.UserId,
+                CreatedDate = reservationDto.CreatedDate,
+            };
+
+            await _repository.UpdateAsync(newReservation);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
 }
