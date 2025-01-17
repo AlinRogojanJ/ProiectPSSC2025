@@ -19,14 +19,16 @@ namespace ProiectPSSC2025.Services.Workfows
         private readonly IConfiguration _configuration;
         private readonly IRoomRepository _roomRepository;
         private readonly IReservationRepository _reservationRepository;
+        private readonly IUserRepository _userRepository;
 
-        public RoomReservationService(ServiceBusClient serviceBusClient, IConfiguration configuration, IRoomRepository roomRepository, IReservationRepository reservationRepository)
+        public RoomReservationService(ServiceBusClient serviceBusClient, IConfiguration configuration, IRoomRepository roomRepository, IReservationRepository reservationRepository, IUserRepository userRepository)
         {
 
             _serviceBusClient = serviceBusClient;
             _configuration = configuration;
             _roomRepository = roomRepository;
             _reservationRepository = reservationRepository;
+            _userRepository = userRepository;
 
         }
 
@@ -55,13 +57,14 @@ namespace ProiectPSSC2025.Services.Workfows
             var messageBody = args.Message.Body.ToString();
             var roomReservationRequest = JsonSerializer.Deserialize<RoomReservationRequestDTO>(messageBody);
             var reservationStatus = "Pending";
+
             var isAvailable = (await _roomRepository.GetRoomByIdAsync(roomReservationRequest.RoomId)).Status == "Available";
+            var user = await _userRepository.GetUserByIdAsync(roomReservationRequest.UserId);
 
-
-            if (!isAvailable)
+            if (!isAvailable || user == null)
             {
                 reservationStatus = "Cancelled";
-                throw new Exception("Room is not available");
+                throw new Exception("Room not available / User not found");
             }
 
             var reservation = new Reservation

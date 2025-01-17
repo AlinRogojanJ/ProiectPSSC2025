@@ -66,6 +66,11 @@ namespace ProiectPSSC2025.Services.Workfows
                 var user = await _userRepository.GetUserByIdAsync(reservationDetails.UserId);
 
                 int nights = (reservationDetails.EndDate - reservationDetails.StartDate).Days;
+                if(nights <=0)
+                {
+                    nights = 1;
+                }
+
                 float totalCost = room.PricePerNight * nights;
 
                 var paymentStatus = "Successful";
