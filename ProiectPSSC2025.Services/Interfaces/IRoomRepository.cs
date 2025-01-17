@@ -15,5 +15,6 @@ namespace ProiectPSSC2025.Services.Interfaces
         Task CreateRoomAsync(Room room);
         Task DeleteRoomAsync(string id);
         Task UpdateRoomAsync(Room room);
+        Task UpdateRoomStatusAsync(string roomId, string roomStatus);
     }
 }
