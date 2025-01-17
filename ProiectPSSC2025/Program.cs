@@ -28,6 +28,7 @@ builder.Services.AddDbContext<ReservationContext>(options =>
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // Register Interfaces and Implementations
+builder.Services.AddTransient<IRoomRepository, RoomRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();

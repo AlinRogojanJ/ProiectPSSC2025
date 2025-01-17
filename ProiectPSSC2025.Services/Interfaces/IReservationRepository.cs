@@ -7,5 +7,7 @@ namespace ProiectPSSC2025.Interfaces
         Task<IEnumerable<Reservation>> GetAllAsync();
         Task<Reservation> GetByIdAsync(string id);
         Task AddAsync(Reservation reservation);
+        Task RemoveAsync(string id);
+        Task UpdateAsync(Reservation reservation);
     }
 }
