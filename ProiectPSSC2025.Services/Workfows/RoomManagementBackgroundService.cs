@@ -27,12 +27,17 @@ namespace ProiectPSSC2025.Services.Workfows
                     using (var scope = _serviceProvider.CreateScope())
                     {
                         var roomManagement = scope.ServiceProvider.GetRequiredService<IRoomManagement>();
-                        await roomManagement.ProcessMessagesAsync(stoppingToken);
+                        var billingService = scope.ServiceProvider.GetRequiredService<IBillingService>();
+
+                        var roomManagementTask = roomManagement.ProcessMessagesAsync(stoppingToken);
+                        var billingServiceTask = billingService.ProcessMessagesAsync(stoppingToken);
+
+                        await Task.WhenAll(roomManagementTask, billingServiceTask);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error in RoomManagementBackgroundService: {ex.Message}");
+                    Console.WriteLine($"Error in background service: {ex.Message}");
                 }
 
                 await Task.Delay(1000, stoppingToken);

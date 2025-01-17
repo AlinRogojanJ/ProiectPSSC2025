@@ -8,6 +8,7 @@ using ProiectPSSC2025.Interfaces;
 using ProiectPSSC2025.Models;
 using Microsoft.Extensions.Configuration;
 using ProiectPSSC2025.Services.Interfaces;
+using ProiectPSSC2025.Models.DTOs;
 
 public class ReservationService : IReservationService
 {
@@ -54,20 +55,11 @@ public class ReservationService : IReservationService
         var reservation = _mapper.Map<Reservation>(reservationDto);
         Console.WriteLine(reservation);
 
-        var room = await _roomRepository.GetRoomByIdAsync(reservationDto.RoomId);
-        var user = await _userRepository.GetUserByIdAsync(reservationDto.UserId);
-
-        int nights = (reservationDto.EndDate - reservationDto.StartDate).Days;
-        float totalCost = room.PricePerNight * nights;
         var isAvailable = (await _roomRepository.GetRoomByIdAsync(reservationDto.RoomId)).Status == "Available";
 
         if (!isAvailable)
         {
             throw new Exception("Room is not available.");
-        }
-        if (user.Budget < totalCost)
-        {
-            throw new Exception("Not enough money for the reservation.");
         }
 
         reservation.Status = "Pending";
@@ -85,11 +77,11 @@ public class ReservationService : IReservationService
 
             string customText = $"Reservation with ID: {reservation.Id} for room {reservation.RoomId} was requested at {DateTime.UtcNow}.";
 
-            var payload = new
+            var payload = new RoomReservationOutputDTO
             {
-                Message = customText,
-                UserData = new { ReservationId = reservation.Id, Status = reservation.Status, UserId = reservation.UserId },
-                Timestamp = DateTime.UtcNow
+                ReservationId = reservation.Id,
+                Status = reservation.Status
+
             };
 
             string messageBody = JsonSerializer.Serialize(payload);
@@ -104,8 +96,6 @@ public class ReservationService : IReservationService
                 throw new Exception("Failed to send message to Service Bus.", ex);
             }
         }
-
-        await _billingService.ProcessBillingAsync(reservationDto);
     }
 
     public async Task RemoveReservationAsync(string id)

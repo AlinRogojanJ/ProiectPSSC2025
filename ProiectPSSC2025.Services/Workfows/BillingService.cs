@@ -4,6 +4,7 @@ using ProiectPSSC2025.DTOs;
 using ProiectPSSC2025.Interfaces;
 using ProiectPSSC2025.Models.DTOs;
 using ProiectPSSC2025.Services.Interfaces;
+using ProiectPSSC2025.Services.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,32 +14,35 @@ using System.Threading.Tasks;
 
 namespace ProiectPSSC2025.Services.Workfows
 {
-    public class RoomManagement : IRoomManagement
+    public class BillingService : IBillingService
     {
         private readonly ServiceBusClient _serviceBusClient;
         private readonly IConfiguration _configuration;
         private readonly IRoomRepository _roomRepository;
         private readonly IReservationRepository _reservationRepository;
+        private readonly IUserRepository _userRepository;
 
-        public RoomManagement(ServiceBusClient serviceBusClient, IConfiguration configuration, IRoomRepository roomRepository, IReservationRepository reservationRepository)
+        public BillingService(ServiceBusClient serviceBusClient, IConfiguration configuration, IRoomRepository roomRepository, IReservationRepository reservationRepository, IUserRepository userRepository)
         {
             _serviceBusClient = serviceBusClient;
             _configuration = configuration;
             _roomRepository = roomRepository;
             _reservationRepository = reservationRepository;
+            _userRepository = userRepository;
         }
 
         public async Task ProcessMessagesAsync(CancellationToken cancellationToken)
         {
-            string queueName = _configuration["ServiceBus:Queues:BillingQueue"];
+            string queueName = _configuration["ServiceBus:Queues:RoomReservationQueue"];
 
             var processor = _serviceBusClient.CreateProcessor(queueName, new ServiceBusProcessorOptions());
 
             processor.ProcessMessageAsync += MessageHandler;
-
             processor.ProcessErrorAsync += ErrorHandler;
 
             await processor.StartProcessingAsync(cancellationToken);
+
+            Console.WriteLine("Billing Service is processing messages.");
 
             // Wait for the background service to be canceled
             await Task.Delay(Timeout.Infinite, cancellationToken);
@@ -47,44 +51,47 @@ namespace ProiectPSSC2025.Services.Workfows
             await processor.StopProcessingAsync();
         }
 
+
         public async Task MessageHandler(ProcessMessageEventArgs args)
         {
             try
             {
                 // Deserializare mesaj
                 var messageBody = args.Message.Body.ToString();
-                var paymentStatus = JsonSerializer.Deserialize<PaymentOutputDTO>(messageBody);
-                var reservationDetails = await _reservationRepository.GetByIdAsync(paymentStatus.ReservationId);
-                var roomStatus = "Reserved";
-                // Procesare mesaj
-                if (paymentStatus.PaymentStatus == "Successful")
+                var roomReservationStatus = JsonSerializer.Deserialize<RoomReservationOutputDTO>(messageBody);
+
+                var reservationDetails = await _reservationRepository.GetByIdAsync(roomReservationStatus.ReservationId);
+
+                var room = await _roomRepository.GetRoomByIdAsync(reservationDetails.RoomId);
+                var user = await _userRepository.GetUserByIdAsync(reservationDetails.UserId);
+
+                int nights = (reservationDetails.EndDate - reservationDetails.StartDate).Days;
+                float totalCost = room.PricePerNight * nights;
+
+                var paymentStatus = "Successful";
+
+                if (user.Budget < totalCost)
                 {
-                    Console.WriteLine($"Reservation {paymentStatus.ReservationId} is paid. Updating room status...");
-
-                    // Actualizează starea camerei
-                    roomStatus = "Reserved";
-                }
-                else
+                    reservationDetails.Status = "Cancelled";
+                    paymentStatus = "Failed";
+                } else
                 {
-                    Console.WriteLine($"Reservation {paymentStatus.ReservationId} is not paid. Updating room status...");
-
-                    // Actualizează starea camerei
-                    roomStatus = "Available";
+                    reservationDetails.Status = "Confirmed";
+                    paymentStatus = "Successful";
                 }
 
-                await _roomRepository.UpdateRoomStatusAsync(reservationDetails.RoomId, roomStatus);
+                await _reservationRepository.UpdateAsync(reservationDetails);
 
                 // Confirmă procesarea mesajului
                 await args.CompleteMessageAsync(args.Message);
 
-                var responseMessage = new RoomManagementResponseDTO
+                var responseMessage = new PaymentOutputDTO
                 {
                     ReservationId = reservationDetails.Id,
-                    RoomId = reservationDetails.RoomId,
-                    RoomStatus = roomStatus,
+                    PaymentStatus = paymentStatus,
                 };
 
-                await SendRoomStatusMessageAsync(responseMessage);
+                await SendMessageAsync(responseMessage);
 
 
             }
@@ -94,22 +101,23 @@ namespace ProiectPSSC2025.Services.Workfows
             }
         }
 
-        public async Task SendRoomStatusMessageAsync(RoomManagementResponseDTO message)
+
+        public async Task SendMessageAsync(PaymentOutputDTO message)
         {
             string messageBody = JsonSerializer.Serialize(message);
-            
+
             try
             {
-                string roomStatusQueue = _configuration["ServiceBus:Queues:RoomStatusQueue"];
-                ServiceBusSender sender = _serviceBusClient.CreateSender(roomStatusQueue);
+                string statusQueue = _configuration["ServiceBus:Queues:BillingQueue"];
+                ServiceBusSender sender = _serviceBusClient.CreateSender(statusQueue);
 
                 ServiceBusMessage serviceBussMessage = new ServiceBusMessage(messageBody);
                 await sender.SendMessageAsync(serviceBussMessage);
-                Console.WriteLine($"Sent room status message: {messageBody}");
+                Console.WriteLine($"Sent billing status message: {messageBody}");
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed to send room status message: {messageBody}", ex);
+                throw new Exception($"Failed to send billing status message: {messageBody}", ex);
             }
 
         }
