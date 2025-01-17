@@ -48,10 +48,10 @@ namespace ProiectPSSC2025.Services
 
             // Service Bus
 
-            string queueName = _configuration["ServiceBus:QueueName"];
+            string queueName = _configuration["ServiceBus:Queues:UserQueue"];
             if (string.IsNullOrWhiteSpace(queueName))
             {
-                throw new InvalidOperationException("ServiceBus QueueName is not configured.");
+                throw new InvalidOperationException("ServiceBus UserQueue is not configured.");
             }
 
             ServiceBusSender sender = _serviceBusClient.CreateSender(queueName);

@@ -23,6 +23,8 @@ namespace ProiectPSSC2025.Models
         [Required]
         [MinLength(8)]
         public string Password { get; set; }
+        [Required]
+        public float Budget { get; set; }
 
         public ICollection<Reservation>? Reservations { get; set; }
     }
