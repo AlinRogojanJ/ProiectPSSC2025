@@ -34,8 +34,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
-builder.Services.AddScoped<IBillingService, BillingService>();
 
+builder.Services.AddScoped<IBillingService, BillingService>();
 builder.Services.AddScoped<IRoomManagement, RoomManagement>();
 builder.Services.AddHostedService<RoomManagementBackgroundService>();
 

@@ -1,4 +1,6 @@
-﻿using ProiectPSSC2025.DTOs;
+﻿using Azure.Messaging.ServiceBus;
+using ProiectPSSC2025.DTOs;
+using ProiectPSSC2025.Models.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +11,9 @@ namespace ProiectPSSC2025.Services.Interfaces
 {
     public interface IBillingService
     {
-        Task ProcessBillingAsync(ReservationDTO reservationDto);
+        Task ProcessMessagesAsync(CancellationToken cancellationToken);
+        Task MessageHandler(ProcessMessageEventArgs args);
+        Task SendMessageAsync(PaymentOutputDTO args);
+        Task ErrorHandler(ProcessErrorEventArgs args);
     }
 }
