@@ -9,6 +9,7 @@ using ProiectPSSC2025.Models;
 using Microsoft.Extensions.Configuration;
 using ProiectPSSC2025.Services.Interfaces;
 using ProiectPSSC2025.Models.DTOs;
+using ProiectPSSC2025.Models.Utils;
 
 public class ReservationService : IReservationService
 {
@@ -50,52 +51,31 @@ public class ReservationService : IReservationService
         return _mapper.Map<ReservationDTO>(reservation);
     }
 
-    public async Task CreateReservationAsync(ReservationDTO reservationDto)
+    public async Task CreateReservationAsync(RoomReservationRequestDTO reservationDto)
     {
-        var reservation = _mapper.Map<Reservation>(reservationDto);
-        Console.WriteLine(reservation);
 
-        var isAvailable = (await _roomRepository.GetRoomByIdAsync(reservationDto.RoomId)).Status == "Available";
-
-        if (!isAvailable)
+        string queueName = _configuration["ServiceBus:Queues:RoomReservationRequestQueue"];
+        if (string.IsNullOrWhiteSpace(queueName))
         {
-            throw new Exception("Room is not available.");
+            throw new InvalidOperationException("ServiceBus RoomReservationRequestQueue is not configured.");
         }
 
-        reservation.Status = "Pending";
-        await _repository.AddAsync(reservation);
+        ServiceBusSender sender = _serviceBusClient.CreateSender(queueName);
 
-        if (reservation.Status == "Pending")
+        Console.WriteLine($"Reservation request for room {reservationDto.RoomId} was requested at {DateTime.Now}.");
+
+        string messageBody = JsonSerializer.Serialize(reservationDto);
+        ServiceBusMessage message = new ServiceBusMessage(messageBody);
+
+        try
         {
-            string queueName = _configuration["ServiceBus:Queues:RoomReservationQueue"];
-            if (string.IsNullOrWhiteSpace(queueName))
-            {
-                throw new InvalidOperationException("ServiceBus RoomReservationQueue is not configured.");
-            }
-
-            ServiceBusSender sender = _serviceBusClient.CreateSender(queueName);
-
-            string customText = $"Reservation with ID: {reservation.Id} for room {reservation.RoomId} was requested at {DateTime.UtcNow}.";
-
-            var payload = new RoomReservationOutputDTO
-            {
-                ReservationId = reservation.Id,
-                Status = reservation.Status
-
-            };
-
-            string messageBody = JsonSerializer.Serialize(payload);
-            ServiceBusMessage message = new ServiceBusMessage(messageBody);
-
-            try
-            {
-                await sender.SendMessageAsync(message);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Failed to send message to Service Bus.", ex);
-            }
+            await sender.SendMessageAsync(message);
         }
+        catch (Exception ex)
+        {
+            throw new Exception("Failed to send message to Service Bus.", ex);
+        }
+
     }
 
     public async Task RemoveReservationAsync(string id)

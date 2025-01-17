@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProiectPSSC2025.DTOs;
 using ProiectPSSC2025.Interfaces;
+using ProiectPSSC2025.Models.DTOs;
 
 namespace ProiectPSSC2025.Controllers
 {   // Controller
@@ -32,13 +33,13 @@ namespace ProiectPSSC2025.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ReservationDTO reservationDto)
+        public async Task<IActionResult> Create([FromBody] RoomReservationRequestDTO reservationDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             await _reservationService.CreateReservationAsync(reservationDto);
-            return CreatedAtAction(nameof(GetById), new { id = reservationDto.Id }, reservationDto);
+            return Created();
         }
 
         [HttpDelete("{id}")]

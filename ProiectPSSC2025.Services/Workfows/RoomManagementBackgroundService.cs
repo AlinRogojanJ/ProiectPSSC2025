@@ -26,13 +26,15 @@ namespace ProiectPSSC2025.Services.Workfows
                 {
                     using (var scope = _serviceProvider.CreateScope())
                     {
+                        var roomReservation = scope.ServiceProvider.GetRequiredService<IRoomReservationService>();
                         var roomManagement = scope.ServiceProvider.GetRequiredService<IRoomManagement>();
                         var billingService = scope.ServiceProvider.GetRequiredService<IBillingService>();
 
+                        var roomReservationTask = roomReservation.ProcessMessagesAsync(stoppingToken);
                         var roomManagementTask = roomManagement.ProcessMessagesAsync(stoppingToken);
                         var billingServiceTask = billingService.ProcessMessagesAsync(stoppingToken);
 
-                        await Task.WhenAll(roomManagementTask, billingServiceTask);
+                        await Task.WhenAll(roomReservationTask, roomManagementTask, billingServiceTask);
                     }
                 }
                 catch (Exception ex)
