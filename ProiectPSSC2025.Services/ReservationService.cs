@@ -46,12 +46,12 @@ public class ReservationService : IReservationService
         var reservation = _mapper.Map<Reservation>(reservationDto);
         await _repository.AddAsync(reservation);
 
-        if (reservation.Status == "BOOKED")
+        if (reservation.Status == "Pending")
         {
-            string queueName = _configuration["ServiceBus:QueueName"];
+            string queueName = _configuration["ServiceBus:Queues:RoomReservationQueue"];
             if (string.IsNullOrWhiteSpace(queueName))
             {
-                throw new InvalidOperationException("ServiceBus QueueName is not configured.");
+                throw new InvalidOperationException("ServiceBus RoomReservationQueue is not configured.");
             }
 
             ServiceBusSender sender = _serviceBusClient.CreateSender(queueName);

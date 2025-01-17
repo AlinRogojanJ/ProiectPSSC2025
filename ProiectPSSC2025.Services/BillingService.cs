@@ -19,10 +19,10 @@ public class BillingService : IBillingService
 
     public async Task ProcessBillingAsync(ReservationDTO reservationDto)
     {
-        string queueName = _configuration["ServiceBus:QueueName"];
+        string queueName = _configuration["ServiceBus:Queues:BillingQueue"];
         if (string.IsNullOrWhiteSpace(queueName))
         {
-            throw new InvalidOperationException("ServiceBus QueueName is not configured.");
+            throw new InvalidOperationException("ServiceBus BillingQueue is not configured.");
         }
 
         ServiceBusSender sender = _serviceBusClient.CreateSender(queueName);
