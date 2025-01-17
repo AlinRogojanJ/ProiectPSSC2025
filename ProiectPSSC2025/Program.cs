@@ -5,6 +5,7 @@ using ProiectPSSC2025.Models.Contexts;
 using ProiectPSSC2025.Services;
 using ProiectPSSC2025.Services.Interfaces;
 using ProiectPSSC2025.Services.Repositories;
+using ProiectPSSC2025.Services.Workfows;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,12 +29,15 @@ builder.Services.AddDbContext<ReservationContext>(options =>
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // Register Interfaces and Implementations
-builder.Services.AddTransient<IRoomRepository, RoomRepository>();
+builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IBillingService, BillingService>();
+
+builder.Services.AddScoped<IRoomManagement, RoomManagement>();
+builder.Services.AddHostedService<RoomManagementBackgroundService>();
 
 // Configure Azure Service Bus
 string serviceBusConnectionString = builder.Configuration["ServiceBus:ConnectionString"];

@@ -68,5 +68,17 @@ namespace ProiectPSSC2025.Services.Repositories
                 await _reservationContext.SaveChangesAsync();
             }
         }
+
+        public async Task UpdateRoomStatusAsync(string roomId, string roomStatus)
+        {
+            var roomToUpdate = await _reservationContext.Rooms.FirstOrDefaultAsync(r => r.Id == roomId);
+            
+            if (roomToUpdate != null)
+            {
+                roomToUpdate.Status = roomStatus;
+                
+                await _reservationContext.SaveChangesAsync();
+            }
+        }
     }
 }
