@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
 using AutoMapper;
 using ProiectPSSC2025.DTOs;
@@ -7,12 +8,12 @@ using ProiectPSSC2025.Interfaces;
 using ProiectPSSC2025.Models;
 using Microsoft.Extensions.Configuration;
 using ProiectPSSC2025.Services.Interfaces;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 public class ReservationService : IReservationService
 {
     private readonly IReservationRepository _repository;
     private readonly IRoomRepository _roomRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
     private readonly ServiceBusClient _serviceBusClient;
     private readonly IConfiguration _configuration;
@@ -24,7 +25,8 @@ public class ReservationService : IReservationService
                               ServiceBusClient serviceBusClient,
                               IConfiguration configuration,
                               IBillingService billingService,
-                              IRoomRepository roomRepository)
+                              IRoomRepository roomRepository,
+                              IUserRepository userRepository)
     {
         _repository = repository;
         _mapper = mapper;
@@ -32,6 +34,7 @@ public class ReservationService : IReservationService
         _configuration = configuration;
         _billingService = billingService;
         _roomRepository = roomRepository;
+        _userRepository = userRepository;
     }
 
     public async Task<IEnumerable<ReservationDTO>> GetAllReservationsAsync()
@@ -51,19 +54,23 @@ public class ReservationService : IReservationService
         var reservation = _mapper.Map<Reservation>(reservationDto);
         Console.WriteLine(reservation);
 
-        // verify user data
+        var room = await _roomRepository.GetRoomByIdAsync(reservationDto.RoomId);
+        var user = await _userRepository.GetUserByIdAsync(reservationDto.UserId);
 
-        // verify rooms status
+        int nights = (reservationDto.EndDate - reservationDto.StartDate).Days;
+        float totalCost = room.PricePerNight * nights;
         var isAvailable = (await _roomRepository.GetRoomByIdAsync(reservationDto.RoomId)).Status == "Available";
 
         if (!isAvailable)
         {
             throw new Exception("Room is not available.");
         }
+        if (user.Budget < totalCost)
+        {
+            throw new Exception("Not enough money for the reservation.");
+        }
 
-        // create reservation with Pending status
         reservation.Status = "Pending";
-
         await _repository.AddAsync(reservation);
 
         if (reservation.Status == "Pending")
@@ -98,8 +105,7 @@ public class ReservationService : IReservationService
             }
         }
 
-        // Start the billing workflow.
-        //await _billingService.ProcessBillingAsync(reservationDto);
+        await _billingService.ProcessBillingAsync(reservationDto);
     }
 
     public async Task RemoveReservationAsync(string id)
@@ -123,7 +129,6 @@ public class ReservationService : IReservationService
             };
 
             await _repository.UpdateAsync(newReservation);
-
         }
         catch (Exception ex)
         {

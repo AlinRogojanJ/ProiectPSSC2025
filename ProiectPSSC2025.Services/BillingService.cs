@@ -19,27 +19,22 @@ public class BillingService : IBillingService
 
     public async Task ProcessBillingAsync(ReservationDTO reservationDto)
     {
-        string queueName = _configuration["ServiceBus:QueueName"];
+        string queueName = _configuration["ServiceBus:Queues:BillingQueue"];
         if (string.IsNullOrWhiteSpace(queueName))
         {
-            throw new InvalidOperationException("ServiceBus QueueName is not configured.");
+            throw new InvalidOperationException("ServiceBus BillingQueue is not configured.");
         }
 
         ServiceBusSender sender = _serviceBusClient.CreateSender(queueName);
 
-        await SendBillingMessageAsync( "Billing process started", sender, reservationDto);
-        await Task.Delay(TimeSpan.FromSeconds(3));
-
-        await SendBillingMessageAsync($"Generating the bill with the info for room {reservationDto.RoomId}", sender, reservationDto);
-        await Task.Delay(TimeSpan.FromSeconds(5));
-
-        await SendBillingMessageAsync("Bill generated", sender, reservationDto);
+        await SendBillingMessageAsync("Bill generated", "Successful", sender, reservationDto);
     }
 
-    private async Task SendBillingMessageAsync(string statusMessage, ServiceBusSender sender, ReservationDTO reservationDto)
+    private async Task SendBillingMessageAsync(string statusMessage, string paymentStatus, ServiceBusSender sender, ReservationDTO reservationDto)
     {
         var payload = new
         {
+            PaymentStatus = paymentStatus,
             ReservationId = reservationDto.Id,
             RoomId = reservationDto.RoomId,
             StatusMessage = statusMessage,
@@ -52,7 +47,7 @@ public class BillingService : IBillingService
         try
         {
             await sender.SendMessageAsync(message);
-            Console.WriteLine($"Sent message: {statusMessage}");
+            Console.WriteLine($"Sent billing message: {statusMessage} with PaymentStatus: {paymentStatus}");
         }
         catch (Exception ex)
         {
