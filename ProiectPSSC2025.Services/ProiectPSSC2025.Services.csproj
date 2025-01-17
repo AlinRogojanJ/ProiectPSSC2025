@@ -16,4 +16,8 @@
     <ProjectReference Include="..\ProiectPSSC2025.Models\ProiectPSSC2025.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Workfows\" />
+  </ItemGroup>
+
 </Project>

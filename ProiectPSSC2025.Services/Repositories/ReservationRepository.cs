@@ -27,4 +27,36 @@ public class ReservationRepository : IReservationRepository
         await _reservationContext.Reservations.AddAsync(reservation);
         await _reservationContext.SaveChangesAsync();
     }
+
+    public async Task RemoveAsync(string id)
+    {
+        var reservationToBeDeleted = await _reservationContext.Reservations.FindAsync(id);
+
+        if (reservationToBeDeleted != null)
+        {
+            _reservationContext.Reservations.Remove(reservationToBeDeleted);
+        }
+
+        await _reservationContext.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(Reservation reservation)
+    {
+        var dbReservation = await _reservationContext.Reservations.FirstOrDefaultAsync(r => r.Id == reservation.Id);
+
+        if (dbReservation != null)
+        {
+            // Update properties
+            dbReservation.CreatedDate = reservation.CreatedDate;
+            dbReservation.UpdatedDate = reservation.UpdatedDate;
+            dbReservation.EndDate = reservation.EndDate;
+            dbReservation.StartDate = reservation.StartDate;
+            dbReservation.Status = reservation.Status;
+            dbReservation.RoomId = reservation.RoomId;
+            dbReservation.UserId = reservation.UserId;
+        }
+
+        await _reservationContext.SaveChangesAsync();
+    }
+
 }
